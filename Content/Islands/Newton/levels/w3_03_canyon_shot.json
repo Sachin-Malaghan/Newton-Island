@@ -1,0 +1,30 @@
+// World 3, level 3 - Practise: projectile motion. Angle and speed both change where the ball comes down.
+{
+  "id": "newton.w3.03",
+  "name": "Canyon Shot",
+  "goal": "Ring the bell across the canyon",
+  "concept": "projectile-motion",
+  "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "The ball keeps moving sideways while gravity pulls it down, so it flies in a curve. Aim and power decide where the curve ends.",
+  "whyStudent": "Sideways speed stays the same; vertical speed changes by g every second. On flat ground the range is R = v² sin 2θ ÷ g, largest at 45°.",
+  "formula": "R = v² sin 2θ ÷ g",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  R = {launcher.speed:1}² × sin {=2*launcher.angle:0}° ÷ {g:2} = {=launcher.speed^2*sin(2*launcher.angle)/g:1} m on flat ground. The bell is about 13 m away.",
+  "stopText": "Missed the bell!",
+  "timeLimit": 8,
+  "par": 1,
+  "previewSeconds": 0.25,
+  "view": [ -4, -0.5, 16.5, 6.5 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 3 ], [ 1, 3 ], [ 1.6, 0 ], [ 9.4, 0 ], [ 10, 3 ], [ 20, 3 ] ], "friction": 0.5, "restitution": 0.3 }
+  ],
+  "zones": [
+    { "id": "bell", "look": "bell", "rect": [ 11.9, 3.7, 12.7, 4.6 ] },
+    { "id": "river", "look": "river", "rect": [ 1.6, -1, 9.4, 0.5 ], "level": 0.35 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -1, 3.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "cliff", "pos": [ -1, 3 ], "accepts": [ "launcher" ], "facing": 1 } ],
+  "tray": [ { "part": "launcher", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ],
+  "fails": [ { "body": "ball", "zone": "river", "say": "Splash!" } ],
+  "predict": { "question": "Will it reach the bell?", "measure": "ball.landX", "choices": [ "short", "rings the bell", "too far" ] }
+}

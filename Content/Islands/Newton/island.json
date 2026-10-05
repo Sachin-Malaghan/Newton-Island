@@ -1,0 +1,24 @@
+// Newton's Island - Physics. Worlds and their levels, in syllabus order. (CLAUDE.md: Data-driven content)
+{
+  "id": "newton",
+  "name": "Newton's Island",
+  "subject": "Physics",
+  "mentor": "Professor Newton",
+  "parts": "parts.json",
+  "worlds": [
+    {
+      "id": "motion-meadow", "number": 1, "name": "Motion Meadow",
+      "teaches": "Distance, speed, velocity, acceleration",
+      "theme": { "skyTop": "#7ec8f0", "skyBottom": "#fff1c9", "hillFar": "#cfe8a9", "hillMid": "#a6d98a", "hillNear": "#7cc473",
+                 "ground": "#5fae5a", "groundDark": "#3e8a4a", "accent": "#ffb347", "sun": "#fff3c4" },
+      "levels": [ "levels/w1_01_first_roll.json", "levels/w1_08_brake.json" ]
+    },
+    {
+      "id": "gravity-cliffs", "number": 3, "name": "Gravity Cliffs",
+      "teaches": "Free fall, projectiles, centre of mass",
+      "theme": { "skyTop": "#8ec9e8", "skyBottom": "#ffe2b8", "hillFar": "#f2c48d", "hillMid": "#e5a568", "hillNear": "#cf8a4f",
+                 "ground": "#d9925a", "groundDark": "#a8633a", "accent": "#ff6f59", "sun": "#fff0c9" },
+      "levels": [ "levels/w3_03_canyon_shot.json" ]
+    }
+  ]
+}

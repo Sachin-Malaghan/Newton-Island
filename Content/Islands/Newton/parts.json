@@ -1,0 +1,31 @@
+// Parts on Newton's Island. "behavior" picks the simulation code; everything else is data.
+// Sliders snap to "step" (the solver tries every notch). "less"/"more" label the ends in Fun Mode.
+{
+  "parts": [
+    {
+      "id": "ramp", "name": "Ramp", "behavior": "ramp", "look": "wood",
+      "blurb": "Starts the ball rolling from a height.",
+      "params": [
+        { "id": "height", "label": "Height", "symbol": "h", "unit": "m", "min": 0.2, "max": 2.0, "step": 0.05, "default": 0.6, "decimals": 2, "less": "low", "more": "high" }
+      ],
+      "props": { "length": 2.4, "lip": 0.35, "startOffset": 0.001, "friction": 0, "restitution": 0.1 }
+    },
+    {
+      "id": "launcher", "name": "Launcher", "behavior": "launcher", "look": "cannon",
+      "blurb": "Fires the ball at an angle and speed you choose.",
+      "params": [
+        { "id": "angle", "label": "Angle", "symbol": "θ", "unit": "°", "min": 10, "max": 80, "step": 1, "default": 45, "decimals": 0, "less": "flat", "more": "steep" },
+        { "id": "speed", "label": "Speed", "symbol": "v", "unit": "m/s", "min": 2, "max": 20, "step": 0.2, "default": 8, "decimals": 1, "less": "gentle", "more": "powerful" }
+      ],
+      "props": { "pivotHeight": 0.35, "barrel": 0.7 }
+    },
+    {
+      "id": "brake", "name": "Brake Pad", "behavior": "brake", "look": "pad",
+      "blurb": "Slows down anything that rolls over it.",
+      "params": [
+        { "id": "strength", "label": "Braking", "symbol": "a", "unit": "m/s²", "min": 0.5, "max": 6, "step": 0.1, "default": 1.5, "decimals": 1, "less": "soft", "more": "hard" }
+      ],
+      "props": { "length": 3, "reach": 1.5 }
+    }
+  ]
+}

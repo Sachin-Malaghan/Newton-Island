@@ -1,0 +1,28 @@
+// World 1, level 1 - Discover: a higher start means more speed. No text needed: the ball falls short.
+{
+  "id": "newton.w1.01",
+  "name": "First Roll",
+  "goal": "Roll the ball into the basket",
+  "concept": "speed-from-height",
+  "syllabus": [ "CBSE Class 9 · Motion", "CBSE Class 9 · Work and Energy" ],
+  "why": "A higher ramp gives the ball more speed, so it flies farther before it lands.",
+  "whyStudent": "Rolling down through a height h turns stored energy into speed. Off the table the ball keeps that speed sideways while gravity pulls it down.",
+  "formula": "v = √(2gh)",
+  "example": "h = {ramp.height:2} m  →  v = √(2 × {g:2} × {ramp.height:2}) ≈ {=sqrt(2*g*ramp.height):2} m/s. Measured leaving the table: {ball.exitSpeed:2} m/s.",
+  "stopText": "Not far enough!",
+  "timeLimit": 8,
+  "par": 1,
+  "view": [ -3.6, -0.3, 7.6, 3.4 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 16, 0 ] ], "friction": 0.6, "restitution": 0.3 },
+    { "look": "block", "points": [ [ -3, 0 ], [ -3, 1 ], [ 3, 1 ], [ 3, 0 ] ], "friction": 0, "restitution": 0.2 },
+    { "look": "basket", "points": [ [ 4.55, 0.45 ], [ 4.55, 0 ] ], "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 5.45, 0 ], [ 5.45, 0.45 ] ], "restitution": 0.3 }
+  ],
+  "zones": [ { "id": "basket", "look": "basket", "rect": [ 4.6, 0, 5.4, 0.45 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2.2, 1.15 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [ { "id": "table", "pos": [ 0.5, 1 ], "accepts": [ "ramp" ], "facing": 1 } ],
+  "tray": [ { "part": "ramp", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "basket" } ],
+  "predict": { "question": "Where will the ball land?", "measure": "ball.landX", "choices": [ "before the basket", "in the basket", "past the basket" ] }
+}

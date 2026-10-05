@@ -1,0 +1,33 @@
+// World 1, level 8 - Practise: deceleration. The cart must stop on the button, not roll into the pond.
+{
+  "id": "newton.w1.08",
+  "name": "Brake!",
+  "goal": "Stop the cart on the button, before the pond",
+  "concept": "deceleration",
+  "syllabus": [ "CBSE Class 9 · Motion" ],
+  "why": "A harder brake takes speed away faster, so the cart stops sooner. Where the brake starts matters too.",
+  "whyStudent": "Braking is acceleration against the motion. A cart at speed u stops in a distance s = u² ÷ 2a after the brake starts.",
+  "formula": "s = u² ÷ 2a",
+  "example": "u = 3.0 m/s, a = {brake.strength:1} m/s²  →  s = 3.0² ÷ (2 × {brake.strength:1}) = {=9/(2*brake.strength):2} m after the pad starts.",
+  "stopText": "Stopped, but not on the button.",
+  "timeLimit": 14,
+  "par": 1,
+  "view": [ -2.6, -1.2, 16.4, 2.8 ],
+  "surfaces": [
+    { "look": "track", "points": [ [ -8, 0 ], [ 12.3, 0 ], [ 12.8, -0.8 ], [ 15.2, -0.8 ], [ 15.7, 0 ], [ 24, 0 ] ], "friction": 0, "restitution": 0.2 }
+  ],
+  "zones": [
+    { "id": "button", "look": "button", "rect": [ 8.9, 0, 9.7, 1 ] },
+    { "id": "pond", "look": "pond", "rect": [ 12.5, -1, 15.5, 0.4 ], "level": -0.2 }
+  ],
+  "bodies": [ { "id": "cart", "kind": "cart", "radius": 0.3, "pos": [ -1.2, 0.3 ], "vel": [ 3, 0 ] } ],
+  "slots": [
+    { "id": "a", "pos": [ 1, 0 ], "accepts": [ "brake" ] },
+    { "id": "b", "pos": [ 4, 0 ], "accepts": [ "brake" ] },
+    { "id": "c", "pos": [ 7, 0 ], "accepts": [ "brake" ] }
+  ],
+  "tray": [ { "part": "brake", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "cart", "zone": "button" } ],
+  "fails": [ { "body": "cart", "zone": "pond", "say": "Splash!" } ],
+  "predict": { "question": "Where will the cart stop?", "measure": "cart.x", "choices": [ "before the button", "on the button", "in the pond" ] }
+}
