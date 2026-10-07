@@ -1,0 +1,20 @@
+// World 3, level 2 - Practise: a wall in the way. Only a steep, high curve gets over it.
+{
+  "id": "newton.w3.02", "name": "Over the Wall", "goal": "Lob the ball over the wall to the bell",
+  "concept": "launch-angle", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "A steeper shot goes higher. High enough, and it sails over the wall.",
+  "whyStudent": "The top of the curve is at H = v² sin²θ ÷ 2g. A steeper angle puts more of the speed into height.",
+  "formula": "H = v² sin²θ ÷ 2g",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  H = {=launcher.speed^2*sin(launcher.angle)^2/(2*g):2} m above the launcher. The wall is 3.2 m tall.",
+  "stopText": "Missed the bell!", "timeLimit": 8, "par": 1,
+  "view": [ -2.4, -0.5, 11.6, 6.2 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0.5, "restitution": 0.3 },
+    { "look": "wall", "points": [ [ 4, 0 ], [ 4, 3.2 ], [ 4.6, 3.2 ], [ 4.6, 0 ] ], "friction": 0.3, "restitution": 0.3 }
+  ],
+  "zones": [ { "id": "bell", "look": "bell", "rect": [ 8.2, 0.7, 9.0, 1.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 0.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1, "params": { "angle": { "default": 30 }, "speed": { "default": 6 } } } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ]
+}

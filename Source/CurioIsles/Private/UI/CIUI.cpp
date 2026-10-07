@@ -16,14 +16,6 @@ namespace
 		Blue = 0x5b7cfa, Coral = 0xff6b5a, Muted = 0xb8bfd1;
 
 	FString ToF(const std::string& S) { return UTF8_TO_TCHAR(S.c_str()); }
-
-	// "speed-from-height" -> "Speed from height"
-	FString Pretty(const std::string& Id)
-	{
-		FString S = ToF(Id).Replace(TEXT("-"), TEXT(" "));
-		if (S.Len() > 0) { S[0] = FChar::ToUpper(S[0]); }
-		return S;
-	}
 	FLinearColor Col(uint32 RGB, float A = 1.f) { return CIColor(RGB, A); }
 
 	enum class EIcon { None, Play, Pause, Retry, Back, Next, Slow, Trash, Lock };
@@ -39,11 +31,6 @@ namespace
 
 	bool Hot(const FUi& Ui, const FBox2D& B) { return Ui.P.bValid && B.IsInside(Ui.P.Pos) && (!Ui.P.bTouch || Ui.P.bDown); }
 
-	int32 LevelNumber(const std::string& Id)
-	{
-		const size_t Dot = Id.rfind('.');
-		return Dot == std::string::npos ? 0 : std::atoi(Id.c_str() + Dot + 1);
-	}
 
 	void DrawIcon(FCIDraw& D, EIcon Icon, double X, double Y, double S, const FLinearColor& C)
 	{
@@ -233,6 +220,29 @@ namespace
 		ModeToggle(Ui, Ui.W - Ui.SR - Ui.U * 2.5, CY);
 	}
 
+	// A round button with just an icon (the in-level controls and the result card).
+	void RoundButton(FUi& Ui, double CX, double CY, double R, EIcon Icon, uint32 Color, ECIAction Action, int32 Param = 0)
+	{
+		FCIDraw& D = Ui.D;
+		const FBox2D B(FVector2D(CX - R, CY - R), FVector2D(CX + R, CY + R));
+		FCIButton Btn;
+		Btn.Box = B.ExpandBy(R * 0.15);
+		Btn.Action = Action;
+		Btn.Param = Param;
+		Ui.G.Buttons.Add(Btn);
+		const bool bHot = Hot(Ui, Btn.Box);
+		const bool bDown = bHot && Ui.P.bDown;
+		const double Lip = R * 0.14, Sink = bDown ? Lip * 0.7 : 0;
+		FLinearColor Face = Col(Color);
+		if (bHot && !bDown) { Face = CIMix(Face, FLinearColor::White, 0.12f); }
+		D.Circle(CX, CY + Lip * 2.2, R * 1.04, FLinearColor(0.1f, 0.08f, 0.2f, 0.18f), 40);
+		D.Circle(CX, CY + Lip, R, CIMix(Face, FLinearColor::Black, 0.25f), 40);
+		D.Circle(CX, CY + Sink, R, Face, 40);
+		D.Ellipse(CX, CY + Sink - R * 0.35, R * 0.78, R * 0.5, FLinearColor(1, 1, 1, 0.14f), 32);
+		DrawIcon(D, Icon, CX + (Icon == EIcon::Play ? R * 0.06 : 0), CY + Sink, R * 1.0, FLinearColor::White);
+	}
+
+	// Level select, Angry Birds style: a row of big numbered tiles per world, stars under each, locks ahead.
 	void DrawLevels(FUi& Ui)
 	{
 		FCIDraw& D = Ui.D;
@@ -240,172 +250,52 @@ namespace
 		if (!G.bLoaded) { D.Text(G.LoadError, Ui.W * 0.5, Ui.H * 0.5, Ui.U * 3, FLinearColor::White, 0.5, 0.5, true); return; }
 		DrawTopBar(Ui, ToF(G.Island.Name), FString::Printf(TEXT("%s  ·  with %s"), *ToF(G.Island.Subject), *ToF(G.Island.Mentor)));
 
-		const int32 NumCards = (int32)G.Island.Worlds.size() + 1;
-		const double Gap = Ui.U * 3;
-		const double Top = Ui.ST + Ui.U * 16, Bottom = Ui.H - Ui.SB - Ui.U * 9;
-		const double Avail = Ui.W - Ui.SL - Ui.SR - Ui.U * 6;
-		const double CW = FMath::Min(Ui.U * 52, (Avail - Gap * (NumCards - 1)) / NumCards);
-		double X = (Ui.W - (CW * NumCards + Gap * (NumCards - 1))) * 0.5;
-		for (int32 Wi = 0; Wi < (int32)G.Island.Worlds.size(); ++Wi, X += CW + Gap)
+		const int32 NumWorlds = (int32)G.Island.Worlds.size();
+		const double Top = Ui.ST + Ui.U * 16, Bottom = Ui.H - Ui.SB - Ui.U * 3;
+		const double BandH = FMath::Min(Ui.U * 38, (Bottom - Top) / FMath::Max(1, NumWorlds) - Ui.U * 2);
+		const double X0 = Ui.SL + Ui.U * 4, X1 = Ui.W - Ui.SR - Ui.U * 4;
+		for (int32 Wi = 0; Wi < NumWorlds; ++Wi)
 		{
 			const CI::FWorldDef& W = G.Island.Worlds[Wi];
-			const FBox2D B(FVector2D(X, Top), FVector2D(X + CW, Bottom));
-			Card(Ui, B);
-			// Header painted in the world's own palette.
-			const double HH = Ui.U * 15;
-			D.RoundRectV(B.Min.X, B.Min.Y, B.Max.X, B.Min.Y + HH, Ui.U * 2.4, Col(W.Theme.SkyTop), Col(W.Theme.SkyBottom));
-			D.Rect(B.Min.X, B.Min.Y + HH - Ui.U * 3.4, B.Max.X, B.Min.Y + HH, Col(W.Theme.Hills[1]));
-			D.Rect(B.Min.X, B.Min.Y + HH - Ui.U * 1.4, B.Max.X, B.Min.Y + HH, Col(W.Theme.Ground));
-			D.Text(FString::Printf(TEXT("WORLD %d"), W.Number), B.Min.X + Ui.U * 2.5, B.Min.Y + Ui.U * 3.3, Ui.U * 2.2, Col(0x10284a, 0.8f), 0, 0.5, true);
-			D.Text(ToF(W.Name), B.Min.X + Ui.U * 2.5, B.Min.Y + Ui.U * 7.5, Ui.U * 3.8, Col(Ink), 0, 0.5, true);
-			D.TextWrapped(ToF(W.Teaches), B.Min.X + Ui.U * 2.5, B.Min.Y + HH + Ui.U * 1.5, CW - Ui.U * 5, Ui.U * 2.2, 1.3, Col(InkSoft));
+			const double Y0 = Top + Wi * (BandH + Ui.U * 2);
+			const FBox2D B(FVector2D(X0, Y0), FVector2D(X1, Y0 + BandH));
+			Card(Ui, B, Cream, Ui.U * 3);
+			// A strip in the world's own colours down the left edge.
+			D.RoundRectV(B.Min.X, B.Min.Y, B.Min.X + Ui.U * 34, B.Max.Y, Ui.U * 3, Col(W.Theme.SkyTop), Col(W.Theme.SkyBottom));
+			D.RoundRect(B.Min.X, B.Max.Y - BandH * 0.26, B.Min.X + Ui.U * 34, B.Max.Y, Ui.U * 3, Col(W.Theme.Ground));
+			D.Rect(B.Min.X, B.Max.Y - BandH * 0.32, B.Min.X + Ui.U * 34, B.Max.Y - BandH * 0.2, Col(W.Theme.Hills[2]));
+			D.Text(FString::Printf(TEXT("WORLD %d"), W.Number), B.Min.X + Ui.U * 3, B.Min.Y + Ui.U * 4, Ui.U * 2.2, Col(0x10284a, 0.75f), 0, 0.5, true);
+			D.TextWrapped(ToF(W.Name), B.Min.X + Ui.U * 3, B.Min.Y + Ui.U * 6.5, Ui.U * 29, Ui.U * 3.8, 1.15, Col(Ink), 0, true);
 
-			double Y = B.Min.Y + HH + Ui.U * 8;
-			for (int32 Li = 0; Li < (int32)W.Levels.size(); ++Li)
+			const double Tile = FMath::Min(BandH - Ui.U * 12, Ui.U * 19);
+			const double Gap = Ui.U * 3;
+			double TX = B.Min.X + Ui.U * 38;
+			const double TY = B.GetCenter().Y - Tile * 0.5 - Ui.U * 2.5;
+			for (int32 Li = 0; Li < (int32)W.Levels.size() && TX + Tile < B.Max.X - Ui.U * 2; ++Li, TX += Tile + Gap)
 			{
 				const CI::FLevelDef& L = W.Levels[Li];
-				const FBox2D RB(FVector2D(B.Min.X + Ui.U * 2, Y), FVector2D(B.Max.X - Ui.U * 2, Y + Ui.U * 9));
+				const bool bOpen = G.IsUnlocked(Wi, Li);
+				const FBox2D TB(FVector2D(TX, TY), FVector2D(TX + Tile, TY + Tile));
 				FCIButton Btn;
-				Btn.Box = RB;
+				Btn.Box = TB;
 				Btn.Action = ECIAction::StartLevel;
 				Btn.Param = Wi * 100 + Li;
+				Btn.bEnabled = bOpen;
 				G.Buttons.Add(Btn);
-				const bool bHot = Hot(Ui, RB);
-				D.RoundRect(RB.Min.X, RB.Min.Y, RB.Max.X, RB.Max.Y, Ui.U * 2, bHot ? Col(0xfff0c9) : Col(0xf3eee2));
-				const double CX = RB.Min.X + Ui.U * 4.8, CY = RB.GetCenter().Y;
-				D.Circle(CX, CY + Ui.U * 0.4, Ui.U * 3.3, Col(0x23984f), 28);
-				D.Circle(CX, CY, Ui.U * 3.3, Col(Green), 28);
-				D.Text(FString::Printf(TEXT("%d"), LevelNumber(L.Id)), CX, CY, Ui.U * 3, FLinearColor::White, 0.5, 0.5, true);
-				D.Text(ToF(L.Name), CX + Ui.U * 5, CY - Ui.U * 1.3, Ui.U * 2.8, Col(Ink), 0, 0.5, true);
-				D.Text(Pretty(L.Concept), CX + Ui.U * 5, CY + Ui.U * 1.9, Ui.U * 1.9, Col(InkSoft), 0, 0.5, false);
+				const bool bHot = bOpen && Hot(Ui, TB);
+				const double Sink = bHot && Ui.P.bDown ? Ui.U * 0.6 : 0;
+				const FLinearColor Face = bOpen ? Col(W.Theme.Accent) : Col(Muted);
+				D.RoundRect(TB.Min.X, TB.Min.Y + Ui.U * 1.0, TB.Max.X, TB.Max.Y + Ui.U * 1.0, Ui.U * 3.5, CIMix(Face, FLinearColor::Black, 0.25f));
+				D.RoundRectV(TB.Min.X, TB.Min.Y + Sink, TB.Max.X, TB.Max.Y + Sink, Ui.U * 3.5, CIMix(Face, FLinearColor::White, bHot ? 0.3f : 0.18f), Face);
+				if (bOpen) { D.Text(FString::Printf(TEXT("%d"), Li + 1), TB.GetCenter().X, TB.GetCenter().Y + Sink - Ui.U * 0.5, Tile * 0.5, FLinearColor::White, 0.5, 0.5, true); }
+				else { DrawIcon(D, EIcon::Lock, TB.GetCenter().X, TB.GetCenter().Y, Tile * 0.42, FLinearColor(1, 1, 1, 0.85f)); }
 				const int32* Best = G.Save ? G.Save->Stars.Find(ToF(L.Id)) : nullptr;
-				Stars(D, RB.Max.X - Ui.U * 6.5, CY, Ui.U * 1.4, Best ? *Best : 0);
-				Y += Ui.U * 11;
+				if (bOpen) { Stars(D, TB.GetCenter().X, TB.Max.Y + Ui.U * 4.2, Tile * 0.11, Best ? *Best : 0); }
 			}
-		}
-		// The rest of the island is on its way.
-		const FBox2D B(FVector2D(X, Top), FVector2D(X + CW, Bottom));
-		Card(Ui, B, 0xe9ecf5);
-		DrawIcon(D, EIcon::Lock, B.GetCenter().X, B.Min.Y + Ui.U * 10, Ui.U * 7, Col(Muted));
-		D.Text(TEXT("More worlds"), B.GetCenter().X, B.Min.Y + Ui.U * 18, Ui.U * 3.4, Col(InkSoft), 0.5, 0.5, true);
-		D.TextWrapped(TEXT("Force Forest, Energy Waterworks, Fluid Lagoon, Wave Beach, Heat Volcano, Light Caves, Spark City, Sky Station"),
-			B.Min.X + Ui.U * 3, B.Min.Y + Ui.U * 23, CW - Ui.U * 6, Ui.U * 2.2, 1.35, Col(InkSoft));
-
-		if (G.Save)
-		{
-			const FString Nb = FString::Printf(TEXT("Lab Notebook: %d concept card%s"), G.Save->Notebook.Num(), G.Save->Notebook.Num() == 1 ? TEXT("") : TEXT("s"));
-			D.Text(Nb, Ui.W * 0.5, Ui.H - Ui.SB - Ui.U * 4.5, Ui.U * 2.6, FLinearColor::White, 0.5, 0.5, true);
 		}
 	}
 
 	// ------------------------------------------------------------ in-level HUD
-
-	void DrawTrayIcon(FCIDraw& D, const std::string& Behavior, double X, double Y, double S, bool bEnabled)
-	{
-		const float A = bEnabled ? 1.f : 0.45f;
-		if (Behavior == "ramp")
-		{
-			D.Tri(X - S * 0.5, Y + S * 0.35, X + S * 0.5, Y + S * 0.35, X - S * 0.5, Y - S * 0.3, Col(0xf0c98f, A));
-			D.RoundLine(X - S * 0.5, Y - S * 0.32, X + S * 0.5, Y + S * 0.33, S * 0.1, Col(0x8a5a2b, A));
-			D.Circle(X - S * 0.3, Y - S * 0.34, S * 0.13, Col(0xff5d57, A), 16);
-		}
-		else if (Behavior == "launcher")
-		{
-			D.RoundLine(X - S * 0.25, Y + S * 0.05, X + S * 0.35, Y - S * 0.35, S * 0.26, Col(0x3d4260, A));
-			D.Circle(X + S * 0.35, Y - S * 0.35, S * 0.1, Col(0xf2c14e, A), 12);
-			D.Circle(X - S * 0.2, Y + S * 0.28, S * 0.17, Col(0x6b4a2e, A), 16);
-			D.Circle(X + S * 0.15, Y + S * 0.28, S * 0.17, Col(0x6b4a2e, A), 16);
-		}
-		else
-		{
-			D.RoundRect(X - S * 0.55, Y + S * 0.05, X + S * 0.55, Y + S * 0.28, S * 0.06, Col(0x33313b, A));
-			for (double Sx = -0.45; Sx < 0.45; Sx += 0.2) { D.Quad(FVector2D(X + S * Sx, Y + S * 0.28), FVector2D(X + S * (Sx + 0.08), Y + S * 0.28), FVector2D(X + S * (Sx + 0.14), Y + S * 0.05), FVector2D(X + S * (Sx + 0.06), Y + S * 0.05), Col(0xffc93c, A)); }
-		}
-	}
-
-	std::string BehaviorName(const CI::FPartDef* Def)
-	{
-		if (!Def) { return ""; }
-		switch (Def->Behavior)
-		{
-		case CI::EPartBehavior::Ramp: return "ramp";
-		case CI::EPartBehavior::Launcher: return "launcher";
-		default: return "brake";
-		}
-	}
-
-	// "1.20 m", "45°" (no space before a degree sign).
-	FString WithUnit(double Value, const CI::FParamDef& Q)
-	{
-		const FString N = ToF(CI::FormatNumber(Value, Q.Decimals));
-		if (Q.Unit.empty()) { return N; }
-		return Q.Unit == "°" ? N + ToF(Q.Unit) : N + TEXT(" ") + ToF(Q.Unit);
-	}
-
-	// The selected part's sliders, laid out in the tray so they never cover the machine.
-	void DrawSliderStrip(FUi& Ui, const FBox2D& Box, int32 Placed, int32 Fixed, const std::vector<CI::FParamDef>& Params)
-	{
-		FCIDraw& D = Ui.D;
-		FCIGame& G = Ui.G;
-		const bool bStudent = G.IsStudent();
-		G.PanelBox = Box;
-		double X0 = Box.Min.X;
-		if (Placed >= 0)
-		{
-			// "Put back" as a round icon button at the start of the strip.
-			const double S = Ui.U * 7.5;
-			const double CY = Box.GetCenter().Y;
-			Button(Ui, FBox2D(FVector2D(X0, CY - S * 0.5), FVector2D(X0 + S, CY + S * 0.5)), FString(), EIcon::Trash, 0x8d93a8, ECIAction::RemovePart);
-			X0 += S + Ui.U * 3;
-		}
-		const int32 N = FMath::Max(1, (int32)Params.size());
-		const double ColGap = Ui.U * 5;
-		const double ColW = (Box.Max.X - X0 - ColGap * (N - 1)) / N;
-		for (int32 K = 0; K < (int32)Params.size(); ++K)
-		{
-			const CI::FParamDef& Q = Params[K];
-			const double CX0 = X0 + K * (ColW + ColGap), CX1 = CX0 + ColW;
-			FCISliderWidget S;
-			S.Placed = Placed;
-			S.Fixed = Fixed;
-			S.Param = K;
-			const double Value = G.SliderValue(S);
-			const double T = Q.Max > Q.Min ? (Value - Q.Min) / (Q.Max - Q.Min) : 0;
-			const double TopY = Box.Min.Y + Ui.U * 2.2;
-			D.Text(ToF(Q.Label), CX0, TopY, Ui.U * 2.6, Col(Ink), 0, 0.5, true);
-			if (bStudent)
-			{
-				const FString Val = FString::Printf(TEXT("%s = %s"), *ToF(Q.Symbol), *WithUnit(Value, Q));
-				D.Text(Val, CX1, TopY, Ui.U * 2.6, Col(Blue), 1, 0.5, true);
-			}
-
-			const double TX0 = CX0 + Ui.U * 1.5, TX1 = CX1 - Ui.U * 1.5, TY = Box.GetCenter().Y + Ui.U * 0.6;
-			S.Track = FBox2D(FVector2D(TX0, TY - Ui.U * 1.5), FVector2D(TX1, TY + Ui.U * 1.5));
-			G.Sliders.Add(S);
-			const bool bGrab = G.SliderGrab == G.Sliders.Num() - 1;
-			D.RoundRect(TX0 - Ui.U * 0.8, TY - Ui.U * 0.8, TX1 + Ui.U * 0.8, TY + Ui.U * 0.8, Ui.U * 0.8, Col(0xe3e6ef));
-			const double KX = FMath::Lerp(TX0, TX1, T);
-			D.RoundRectV(TX0 - Ui.U * 0.8, TY - Ui.U * 0.8, KX, TY + Ui.U * 0.8, Ui.U * 0.8, Col(0xffd76a), Col(Yellow));
-			if (bStudent)
-			{
-				for (int32 Nt = 0; Nt <= 10; ++Nt)
-				{
-					const double NX = FMath::Lerp(TX0, TX1, Nt / 10.0);
-					D.Line(NX, TY + Ui.U * 1.4, NX, TY + Ui.U * (Nt % 5 == 0 ? 2.4 : 1.9), 1.5, Col(Muted));
-				}
-			}
-			const double KR = Ui.U * (bGrab ? 2.9 : 2.5);
-			D.Circle(KX, TY + Ui.U * 0.35, KR, Col(0x1f2440, 0.18f), 24);
-			D.Circle(KX, TY, KR, FLinearColor::White, 24);
-			D.Ring(KX, TY, KR * 0.62, KR, Col(Coral), 24);
-			const FString Lo = bStudent ? WithUnit(Q.Min, Q) : ToF(Q.Less);
-			const FString Hi = bStudent ? WithUnit(Q.Max, Q) : ToF(Q.More);
-			const double LY = Box.Max.Y - Ui.U * 2.0;
-			D.Text(Lo, TX0 - Ui.U * 0.8, LY, Ui.U * 2.0, Col(InkSoft), 0, 0.5, false);
-			D.Text(Hi, TX1 + Ui.U * 0.8, LY, Ui.U * 2.0, Col(InkSoft), 1, 0.5, false);
-		}
-	}
-
 
 	void DrawResultCard(FUi& Ui)
 	{
@@ -424,20 +314,22 @@ namespace
 		const FString Example = ToF(CI::FormatTemplate(L.Example, Vars));
 		const TArray<FString> WhyLines = D.Wrap(Why, CW - Pad * 2, Ui.U * 2.6);
 		const TArray<FString> ExLines = bStudent ? D.Wrap(Example, CW - Pad * 2, Ui.U * 2.4) : TArray<FString>();
-		double CH = Ui.U * 25 + WhyLines.Num() * Ui.U * 3.6 + Ui.U * 12;
+		double CH = Ui.U * 25 + WhyLines.Num() * Ui.U * 3.6 + Ui.U * 22;
 		if (bStudent) { CH += Ui.U * 8 + ExLines.Num() * Ui.U * 3.3 + Ui.U * 6; }
 		const double X0 = (G.WorldBox.Min.X + G.WorldBox.Max.X) * 0.5 - CW * 0.5;
 		const double Y0 = FMath::Max(G.WorldBox.Min.Y + Ui.U * 1, (G.WorldBox.Min.Y + G.WorldBox.Max.Y) * 0.5 - CH * 0.5) + (1 - Ease) * Ui.U * 8;
 		const FBox2D B(FVector2D(X0, Y0), FVector2D(X0 + CW, Y0 + CH));
-		// Dim the world only: the tray buttons (RETRY / NEXT) stay bright.
-		D.Rect(0, 0, Ui.W, G.TrayBox.bIsValid ? G.TrayBox.Min.Y - Ui.U * 0.5 : Ui.H, FLinearColor(0.05f, 0.05f, 0.15f, 0.25f * (float)Ease));
+		D.Rect(0, 0, Ui.W, Ui.H, FLinearColor(0.05f, 0.05f, 0.15f, 0.25f * (float)Ease));
 		Card(Ui, B);
 
 		// Ribbon.
 		D.RoundRectV(X0 + Pad, Y0 - Ui.U * 3, X0 + CW - Pad, Y0 + Ui.U * 5, Ui.U * 2.5, Col(0x4fd382), Col(Green));
 		D.Text(TEXT("MACHINE FIXED!"), X0 + CW * 0.5, Y0 + Ui.U * 1, Ui.U * 4, FLinearColor::White, 0.5, 0.5, true);
-		Stars(D, X0 + CW * 0.5, Y0 + Ui.U * 11, Ui.U * 3.2, G.Stars);
-		D.Text(TEXT("solved   ·   within par   ·   predict (soon)"), X0 + CW * 0.5, Y0 + Ui.U * 16.5, Ui.U * 1.9, Col(InkSoft), 0.5, 0.5, false);
+		// Stars pop in one after another.
+		const int32 Shown = FMath::Clamp((int32)((G.PhaseTime - 1.2) / 0.3) + 1, 0, G.Stars);
+		Stars(D, X0 + CW * 0.5, Y0 + Ui.U * 11, Ui.U * (3.2 + 0.5 * FMath::Max(0.0, 1.0 - FMath::Fmod(FMath::Max(0.0, G.PhaseTime - 1.2), 0.3) * 6.0) * (Shown < G.Stars ? 1 : 0)), Shown);
+		const FString Tries = G.Attempts == 1 ? FString(TEXT("First try!")) : FString::Printf(TEXT("Solved in %d tries"), G.Attempts);
+		D.Text(Tries, X0 + CW * 0.5, Y0 + Ui.U * 16.5, Ui.U * 1.9, Col(InkSoft), 0.5, 0.5, false);
 
 		double Y = Y0 + Ui.U * 21;
 		if (bStudent)
@@ -464,7 +356,13 @@ namespace
 				CX += Sz.X + Ui.U * 3.4;
 			}
 		}
-		D.Text(TEXT("New concept card added to your Lab Notebook"), X0 + CW * 0.5, B.Max.Y - Ui.U * 3.2, Ui.U * 1.9, Col(InkSoft), 0.5, 0.5, false);
+		// Levels / again / next, as three round buttons.
+		int32 NW, NL;
+		const bool bNext = G.FindNextLevel(NW, NL);
+		const double BY = B.Max.Y - Ui.U * 7.5;
+		RoundButton(Ui, X0 + CW * 0.5 - Ui.U * 17, BY, Ui.U * 5, EIcon::Back, Blue, ECIAction::Back);
+		RoundButton(Ui, X0 + CW * 0.5, BY, Ui.U * 5, EIcon::Retry, Coral, ECIAction::Retry);
+		RoundButton(Ui, X0 + CW * 0.5 + Ui.U * 18, BY - Ui.U * 0.5, Ui.U * 6.5, bNext ? EIcon::Next : EIcon::Back, Green, bNext ? ECIAction::NextLevel : ECIAction::Back);
 	}
 
 	void DrawFailBubble(FUi& Ui)
@@ -503,6 +401,8 @@ namespace
 		for (int I = 0; I < 3; ++I) { D.Text(Lines[I], X0 + Ui.U * 2.2, Y0 + Ui.U * (2.8 + I * 3.8), Ui.U * 2.5, I == 1 ? Col(0xffd23f) : FLinearColor::White, 0, 0.5, true); }
 	}
 
+	// In a level there is almost no interface: the machine fills the screen, one big round button
+	// starts it, and a miss resets by itself.
 	void DrawPlaying(FUi& Ui)
 	{
 		FCIDraw& D = Ui.D;
@@ -512,96 +412,41 @@ namespace
 		if (!LP || !WP) { return; }
 		const CI::FLevelDef& L = *LP;
 
-		DrawTopBar(Ui, FString::Printf(TEXT("%d-%d  %s"), WP->Number, LevelNumber(L.Id), *ToF(L.Name)), ToF(L.Goal));
+		DrawTopBar(Ui, FString::Printf(TEXT("%d-%d  %s"), WP->Number, G.LevelIndex + 1, *ToF(L.Name)), ToF(L.Goal));
 		{
 			const int32* Best = G.Save ? G.Save->Stars.Find(ToF(L.Id)) : nullptr;
 			const double SX = Ui.W - Ui.SR - Ui.U * 2.5 - Ui.U * 30 - Ui.U * 10;
 			Stars(D, SX, Ui.ST + Ui.U * 6.5, Ui.U * 1.7, Best ? *Best : 0, true);
 		}
-
 		if (G.IsStudent() && G.Phase != ECIPhase::Build) { DrawReadout(Ui); }
 
-		// Tray.
-		const double TY = Ui.H - G.TrayH;
-		const FBox2D Tray(FVector2D(Ui.SL + Ui.U * 1.5, TY + Ui.U * 1.5), FVector2D(Ui.W - Ui.SR - Ui.U * 1.5, Ui.H - FMath::Max(Ui.SB, Ui.U * 1.5)));
-		G.TrayBox = Tray;
-		Card(Ui, Tray, Cream, Ui.U * 3);
-		const double BH = Tray.GetSize().Y - Ui.U * 4;
-		const double CY = Tray.GetCenter().Y;
-		const double PlayW = Ui.U * 30;
-		const FBox2D Right(FVector2D(Tray.Max.X - Ui.U * 2 - PlayW, CY - BH * 0.5), FVector2D(Tray.Max.X - Ui.U * 2, CY + BH * 0.5));
+		const double R = Ui.U * 8.5;
+		const double BX = Ui.W - Ui.SR - Ui.U * 4 - R, BY = Ui.H - Ui.SB - Ui.U * 4.5 - R;
+		const double LX = Ui.SL + Ui.U * 4 + R * 0.7;
+		bool bLauncher = false;
+		for (const CI::FPlacedPart& Pp : G.Setup.Placed) { bLauncher = bLauncher || L.Tray[Pp.Tray].Part == "launcher"; }
 
 		if (G.Phase == ECIPhase::Build)
 		{
-			double X = Tray.Min.X + Ui.U * 2;
-			for (int32 I = 0; I < (int32)L.Tray.size(); ++I)
-			{
-				const CI::FPartDef* Def = G.Island.Catalog.Find(L.Tray[I].Part);
-				const int32 Left = G.TrayRemaining(I);
-				const FBox2D CB(FVector2D(X, CY - BH * 0.5), FVector2D(X + BH * 1.5, CY + BH * 0.5));
-				FCITrayCard Tc;
-				Tc.Box = CB;
-				Tc.Tray = I;
-				G.TrayCards.Add(Tc);
-				const bool bHot = Left > 0 && Hot(Ui, CB);
-				D.RoundRect(CB.Min.X, CB.Min.Y, CB.Max.X, CB.Max.Y, Ui.U * 2, bHot ? Col(0xfff0c9) : Col(0xf1ece0));
-				DrawTrayIcon(D, BehaviorName(Def), CB.GetCenter().X, CB.Min.Y + BH * 0.38, BH * 0.5, Left > 0);
-				D.Text(Def ? ToF(Def->Name) : FString(), CB.GetCenter().X, CB.Max.Y - BH * 0.18, Ui.U * 2.3, Left > 0 ? Col(Ink) : Col(Muted), 0.5, 0.5, true);
-				D.Circle(CB.Max.X - Ui.U * 1.4, CB.Min.Y + Ui.U * 1.4, Ui.U * 2.1, Left > 0 ? Col(Coral) : Col(Muted), 20);
-				D.Text(FString::Printf(TEXT("%d"), Left), CB.Max.X - Ui.U * 1.4, CB.Min.Y + Ui.U * 1.4, Ui.U * 2.2, FLinearColor::White, 0.5, 0.5, true);
-				X += BH * 1.5 + Ui.U * 2;
-			}
-			const FBox2D Strip(FVector2D(X + Ui.U * 2, CY - BH * 0.5), FVector2D(Right.Min.X - Ui.U * 4, CY + BH * 0.5));
-			if (G.Selected >= 0 && G.Selected < (int32)G.Setup.Placed.size())
-			{
-				DrawSliderStrip(Ui, Strip, G.Selected, -1, L.Tray[G.Setup.Placed[G.Selected].Tray].Params);
-			}
-			else if (G.SelectedFixed >= 0 && G.SelectedFixed < (int32)L.Fixed.size() && L.Fixed[G.SelectedFixed].bTunable)
-			{
-				DrawSliderStrip(Ui, Strip, -1, G.SelectedFixed, L.Fixed[G.SelectedFixed].Params);
-			}
-			else if (Strip.GetSize().X > Ui.U * 10)
-			{
-				bool bLauncher = false;
-				for (const CI::FPlacedPart& Pp : G.Setup.Placed) { bLauncher = bLauncher || L.Tray[Pp.Tray].Part == "launcher"; }
-				const FString Hint = G.Setup.Placed.empty() ? TEXT("Drag a part onto a glowing spot")
-					: (bLauncher ? TEXT("Pull the ball back and let go to fire!") : TEXT("Drag the glowing grip on the machine, then press PLAY"));
-				D.TextWrapped(Hint, Strip.Min.X + Ui.U * 1, CY - Ui.U * 1.6, Strip.GetSize().X, Ui.U * 2.6, 1.3, Col(InkSoft), 0, false);
-			}
-			Button(Ui, Right, TEXT("PLAY"), EIcon::Play, Green, ECIAction::Run, 0, true, Ui.U * 4.2);
+			// One line that says what to do, sitting under the machine.
+			const FString Hint = bLauncher ? TEXT("Pull the ball back and let go!")
+				: (L.Slots.size() > 1 ? TEXT("Drag the glowing grip. Drag the part to move it. Then press play.") : TEXT("Drag the glowing grip, then press play."));
+			const double Fs = Ui.U * 2.7;
+			const FVector2D Sz = D.MeasureText(Hint, Fs, true);
+			const double HY = Ui.H - Ui.SB - Ui.U * 6;
+			D.RoundRect(Ui.W * 0.5 - Sz.X * 0.5 - Fs, HY - Fs * 1.1, Ui.W * 0.5 + Sz.X * 0.5 + Fs, HY + Fs * 1.1, Fs * 1.1, Col(0x10284a, 0.55f));
+			D.Text(Hint, Ui.W * 0.5, HY, Fs, FLinearColor::White, 0.5, 0.5, true);
+			// Launchers fire when you let go, so their PLAY button is small and secondary.
+			const double Pulse = bLauncher ? 0.7 : 1.0 + 0.04 * FMath::Sin(G.RealTime * 4.0);
+			RoundButton(Ui, BX + R * (1 - Pulse) * 0.5, BY + R * (1 - Pulse) * 0.5, R * Pulse, EIcon::Play, Green, ECIAction::Run);
 		}
 		else if (G.Phase == ECIPhase::Running)
 		{
-			const double BW = Ui.U * 20;
-			double X = Tray.GetCenter().X - (BW * 3 + Ui.U * 4) * 0.5;
-			Button(Ui, FBox2D(FVector2D(X, CY - BH * 0.5), FVector2D(X + BW, CY + BH * 0.5)), G.bPaused ? TEXT("GO") : TEXT("PAUSE"), G.bPaused ? EIcon::Play : EIcon::Pause, Blue, ECIAction::Pause, 0, true, Ui.U * 3);
-			X += BW + Ui.U * 2;
-			Button(Ui, FBox2D(FVector2D(X, CY - BH * 0.5), FVector2D(X + BW, CY + BH * 0.5)), G.bSlow ? TEXT("0.25x") : TEXT("SLOW"), EIcon::Slow, G.bSlow ? Yellow : 0x8d93a8, ECIAction::SlowMo, 0, true, Ui.U * 3);
-			X += BW + Ui.U * 2;
-			Button(Ui, FBox2D(FVector2D(X, CY - BH * 0.5), FVector2D(X + BW, CY + BH * 0.5)), TEXT("RETRY"), EIcon::Retry, Coral, ECIAction::Retry, 0, true, Ui.U * 3);
+			RoundButton(Ui, BX + R * 0.15, BY + R * 0.15, R * 0.85, EIcon::Retry, Coral, ECIAction::Retry);
+			RoundButton(Ui, LX, BY + R * 0.3, R * 0.7, EIcon::Slow, G.bSlow ? Yellow : 0x8d93a8, ECIAction::SlowMo);
 		}
-		else
-		{
-			if (G.bSuccess)
-			{
-				int32 NW, NL;
-				const bool bNext = G.FindNextLevel(NW, NL);
-				Button(Ui, Right, bNext ? TEXT("NEXT") : TEXT("LEVELS"), EIcon::Next, Green, ECIAction::NextLevel, 0, true, Ui.U * 4.2);
-				Button(Ui, FBox2D(FVector2D(Right.Min.X - Ui.U * 24, Right.Min.Y), FVector2D(Right.Min.X - Ui.U * 3, Right.Max.Y)), TEXT("RETRY"), EIcon::Retry, Blue, ECIAction::Retry, 0, true, Ui.U * 3.2);
-				D.Text(FString::Printf(TEXT("Solved in %.2f s"), G.Sim.Time), Tray.Min.X + Ui.U * 4, CY, Ui.U * 2.8, Col(Ink), 0, 0.5, true);
-			}
-			else
-			{
-				const double Pulse = 1.0 + 0.04 * FMath::Sin(G.RealTime * 6.0);
-				const FVector2D C = Right.GetCenter();
-				const FVector2D Half = Right.GetExtent() * Pulse;
-				Button(Ui, FBox2D(C - Half, C + Half), TEXT("RETRY"), EIcon::Retry, Coral, ECIAction::Retry, 0, true, Ui.U * 4.2);
-				D.Text(TEXT("Your parts stay where you put them."), Tray.Min.X + Ui.U * 4, CY, Ui.U * 2.6, Col(InkSoft), 0, 0.5, false);
-			}
-		}
-
-		if (G.Phase == ECIPhase::Result && G.bSuccess) { DrawResultCard(Ui); }
-		if (G.Phase == ECIPhase::Result && !G.bSuccess) { DrawFailBubble(Ui); }
+		else if (G.bSuccess) { DrawResultCard(Ui); }
+		else { DrawFailBubble(Ui); }
 	}
 
 	void DrawToast(FUi& Ui)
@@ -621,7 +466,7 @@ void FCIUI::Layout(FCIDraw& D, FCIGame& G)
 {
 	const double U = D.ScreenH / 100.0;
 	G.TopBarH = G.Safe.Y + U * 13;
-	G.TrayH = G.Screen == ECIScreen::Playing ? G.Safe.W + U * 19 : 0;
+	G.TrayH = 0;   // no tray: the machine fills the screen
 }
 
 void FCIUI::Draw(FCIDraw& D, FCIGame& G, const FCIPointer& Pointer)

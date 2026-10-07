@@ -1,0 +1,26 @@
+// World 1, level 3 - Practise: speed. Enough speed to clear the ditch, not so much that it overshoots.
+{
+  "id": "newton.w1.03", "name": "Ditch Jump", "goal": "Jump the ditch and land in the basket",
+  "concept": "speed", "syllabus": [ "CBSE Class 9 · Motion" ],
+  "why": "A faster ball covers more ground in the same fall time, so it clears the ditch.",
+  "whyStudent": "The fall always takes the same time, so the distance flown is speed × time: more height, more speed, longer jump.",
+  "formula": "distance = speed × time",
+  "example": "Leaving the table at {ball.exitSpeed:2} m/s, the ball flew for about 0.5 s and covered {=ball.exitSpeed*0.5:1} m.",
+  "stopText": "Not in the basket!", "timeLimit": 8, "par": 1,
+  "view": [ -3.6, -0.9, 7.6, 3.8 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 3.2, 0 ], [ 3.4, -0.6 ], [ 4.4, -0.6 ], [ 4.6, 0 ], [ 16, 0 ] ], "friction": 0.6, "restitution": 0.3 },
+    { "look": "block", "points": [ [ -3, 0 ], [ -3, 1.4 ], [ 3, 1.4 ], [ 3, 0 ] ], "friction": 0, "restitution": 0.2 },
+    { "look": "basket", "points": [ [ 4.95, 0.45 ], [ 4.95, 0 ] ], "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 5.85, 0 ], [ 5.85, 0.45 ] ], "restitution": 0.3 }
+  ],
+  "zones": [
+    { "id": "basket", "look": "basket", "rect": [ 5.0, 0, 5.8, 0.45 ] },
+    { "id": "ditch", "look": "pond", "rect": [ 3.3, -1, 4.5, 0.1 ], "level": -0.15 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2.2, 1.55 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [ { "id": "table", "pos": [ 0.5, 1.4 ], "accepts": [ "ramp" ] } ],
+  "tray": [ { "part": "ramp", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "basket" } ],
+  "fails": [ { "body": "ball", "zone": "ditch", "say": "Splash!" } ]
+}

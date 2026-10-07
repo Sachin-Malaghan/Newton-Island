@@ -109,7 +109,7 @@ namespace
 			{ nullptr, 0.1f, Level(0, 0, true, 1) },
 			{ TEXT("15_student_running"), 0.62f, Run },
 			{ TEXT("16_student_solved"), 4.4f, [](FCIGame&, UCISaveGame*) {} },
-			{ TEXT("20_brake_build"), 1.0f, Level(0, 1, false, 0) },
+			{ TEXT("20_brake_build"), 1.0f, Level(0, 4, false, 0) },
 			{ nullptr, 0.1f, [](FCIGame& G, UCISaveGame*)
 				{
 					CI::FSetup S = G.Setup;
@@ -121,10 +121,10 @@ namespace
 					G.ApplySetup(S);
 				} },
 			{ TEXT("21_brake_splash"), 6.4f, Run },
-			{ TEXT("22_brake_solved_student"), 0.1f, Level(0, 1, true, 1) },
+			{ TEXT("22_brake_solved_student"), 0.1f, Level(0, 4, true, 1) },
 			{ nullptr, 0.1f, Run },
 			{ TEXT("23_brake_stopped_student"), 6.0f, [](FCIGame&, UCISaveGame*) {} },
-			{ TEXT("30_canyon_build"), 1.0f, Level(1, 0, false, 2) },
+			{ TEXT("30_canyon_build"), 1.0f, Level(1, 2, false, 2) },
 			{ TEXT("30b_canyon_aiming"), 0.8f, [](FCIGame& G, UCISaveGame*)
 				{
 					// Hold the launcher pulled back, as a finger would.
@@ -136,7 +136,16 @@ namespace
 			{ nullptr, 0.05f, [](FCIGame& G, UCISaveGame*) { G.GripGrab = -1; } },
 			{ TEXT("31_canyon_flight"), 0.75f, Run },
 			{ TEXT("32_canyon_solved"), 3.2f, [](FCIGame&, UCISaveGame*) {} },
-			{ TEXT("33_canyon_student"), 1.0f, Level(1, 0, true, 2) },
+			{ TEXT("33_canyon_student"), 1.0f, Level(1, 2, true, 2) },
+			{ TEXT("40_too_far"), 1.0f, Level(0, 1, false, 0) },
+			{ TEXT("41_ditch_jump"), 1.0f, Level(0, 2, false, 1) },
+			{ TEXT("42_first_shot"), 2.6f, Level(1, 0, false, 0) },
+			{ TEXT("43_over_the_wall"), 1.0f, Level(1, 1, false, 1) },
+			{ TEXT("44_low_bridge"), 1.0f, Level(1, 3, false, 1) },
+			{ TEXT("45_drop_and_bounce"), 1.0f, Level(1, 4, false, 1) },
+			{ TEXT("46_bounce_running"), 1.25f, Run },
+			{ TEXT("47_levels_progress"), 5.0f, [](FCIGame& G, UCISaveGame*) { } },
+			{ TEXT("48_levels"), 1.0f, [](FCIGame& G, UCISaveGame*) { G.GoTo(ECIScreen::Levels); } },
 		};
 	}
 }

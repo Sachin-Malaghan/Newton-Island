@@ -233,6 +233,28 @@ namespace
 			}
 			return;
 		}
+		if (Surf.Look == "wall")
+		{
+			// Stone: a filled shape with courses of blocks.
+			TArray<FVector2D> Poly;
+			double MinY = 1e9, MaxY = -1e9, MinX = 1e9, MaxX = -1e9;
+			for (size_t I = 0; I < Pts.size(); ++I)
+			{
+				if (I + 1 == Pts.size() && Pts[I] == Pts[0]) { break; }
+				Poly.Add(V(Pts[I]));
+			}
+			for (const FVec2& P : Pts) { MinY = FMath::Min(MinY, P.Y); MaxY = FMath::Max(MaxY, P.Y); MinX = FMath::Min(MinX, P.X); MaxX = FMath::Max(MaxX, P.X); }
+			D.Polygon(Poly, Col(0x9a93a6));
+			int Row = 0;
+			for (double Y = MinY + 0.4; Y < MaxY - 0.05; Y += 0.4, ++Row)
+			{
+				D.Line(MinX, Y, MaxX, Y, 0.03, Col(0x7d7689));
+				for (double X = MinX + (Row % 2 ? 0.3 : 0.6); X < MaxX - 0.05; X += 0.6) { D.Line(X, Y - 0.4, X, Y, 0.03, Col(0x7d7689)); }
+			}
+			D.Rect(MinX, MaxY - 0.08, MaxX, MaxY, Col(0xb9b3c4));
+			D.Polyline(Poly, 0.05, Col(0x6d6679), true);
+			return;
+		}
 		if (Surf.Look == "block")
 		{
 			TArray<FVector2D> Poly;
@@ -357,6 +379,27 @@ namespace
 				D.Circle(Base.X + Wx, Base.Y + 0.17, 0.04, C(0x6b4a2e), 8);
 			}
 			D.Circle(Pv.X, Pv.Y, 0.08, C(0xf2c14e), 12);
+			break;
+		}
+		case CI::EPartBehavior::Bouncer:
+		{
+			if (G.Chains.empty()) { return; }
+			const FVec2 A = G.Chains[0].Points[0], B2 = G.Chains[0].Points[1];
+			const FVec2 Dir = (B2 - A).Normalized();
+			FVec2 N = Dir.Perp();
+			if (N.Y < 0) { N = -N; }
+			if (bSelected) { D.Glow(G.Pivot.X, G.Pivot.Y, 1.6, Col(0xffe066, 0.55f * Alpha), Col(0xffe066, 0.f)); }
+			// Post and springs, then the pad.
+			D.RoundRect(G.Base.X - 0.35, G.Base.Y - 0.02, G.Base.X + 0.35, G.Base.Y + 0.1, 0.04, C(0x5b6070));
+			D.Line(G.Base.X, G.Base.Y + 0.05, G.Pivot.X - N.X * 0.12, G.Pivot.Y - N.Y * 0.12, 0.09, C(0x8d93a8));
+			for (double T : { 0.2, 0.8 })
+			{
+				const FVec2 P0 = A + (B2 - A) * T - N * 0.06;
+				D.Line(P0.X, P0.Y, G.Base.X + (T - 0.5) * 0.4, G.Base.Y + 0.08, 0.035, C(0xb8bfd1));
+			}
+			D.RoundLine(A.X - N.X * 0.07, A.Y - N.Y * 0.07, B2.X - N.X * 0.07, B2.Y - N.Y * 0.07, 0.16, C(0x3d4260));
+			D.RoundLine(A.X, A.Y, B2.X, B2.Y, 0.09, C(0x4fd382));
+			D.RoundLine(A.X + Dir.X * 0.15, A.Y + Dir.Y * 0.15, B2.X - Dir.X * 0.15, B2.Y - Dir.Y * 0.15, 0.03, C(0xb6f5cf));
 			break;
 		}
 		case CI::EPartBehavior::Brake:
@@ -673,7 +716,7 @@ namespace
 			D.Circle(P.X, P.Y, R * 0.62, Col(0xff6b5a), 20);
 			// Arrows show which way it moves.
 			const double A = R * 1.5, Hd = R * 0.5;
-			if (Grip.Kind == ECIGrip::RampHeight)
+			if (Grip.Kind == ECIGrip::RampHeight || Grip.Kind == ECIGrip::Tilt)
 			{
 				D.Tri(P.X - Hd, P.Y + A, P.X + Hd, P.Y + A, P.X, P.Y + A + Hd * 1.3, FLinearColor(1, 1, 1, 0.9f));
 				D.Tri(P.X - Hd, P.Y - A, P.X + Hd, P.Y - A, P.X, P.Y - A - Hd * 1.3, FLinearColor(1, 1, 1, 0.9f));
@@ -682,6 +725,28 @@ namespace
 			{
 				D.Tri(P.X + A, P.Y - Hd, P.X + A, P.Y + Hd, P.X + A + Hd * 1.3, P.Y, FLinearColor(1, 1, 1, 0.9f));
 				D.Tri(P.X - A, P.Y - Hd, P.X - A, P.Y + Hd, P.X - A - Hd * 1.3, P.Y, FLinearColor(1, 1, 1, 0.9f));
+			}
+		}
+
+		// Until the player has grabbed something, a ghost finger shows the move.
+		if (!G.bHintDone && G.GripGrab < 0)
+		{
+			const double T = FMath::Fmod(S.Time, 2.2) / 2.2;
+			const double E = FMath::SmoothStep(0.15, 0.75, T);
+			const float Fade = (float)(FMath::SmoothStep(0.0, 0.12, T) * (1.0 - FMath::SmoothStep(0.85, 1.0, T)));
+			for (const FCIGrip& Grip : G.Grips())
+			{
+				FVector2D To = Grip.World;
+				if (Grip.Kind == ECIGrip::LauncherAim) { To += FVector2D(-1.5, -1.2); }
+				else if (Grip.Kind == ECIGrip::RampHeight) { To += FVector2D(0, 0.7); }
+				else if (Grip.Kind == ECIGrip::BrakeStrength) { To += FVector2D(1.0, 0); }
+				else { To += FVector2D(0, 0.5); }
+				const FVector2D F = FMath::Lerp(Grip.World, To, E);
+				D.Line(Grip.World.X, Grip.World.Y, F.X, F.Y, R * 0.25, FLinearColor(1, 1, 1, 0.35f * Fade));
+				D.Circle(F.X, F.Y - R * 0.15, R * 1.15, Col(0x1f2440, 0.2f * Fade), 24);
+				D.Circle(F.X, F.Y, R * 1.1, FLinearColor(1, 1, 1, 0.9f * Fade), 24);
+				D.Ring(F.X, F.Y, R * 1.3, R * 1.5, FLinearColor(1, 1, 1, 0.5f * Fade), 28);
+				break;
 			}
 		}
 
@@ -752,6 +817,21 @@ namespace
 		{
 			if (Z.Look == "bell") { DrawBell(S, Z, AliveT >= 0 ? 0.55 * FMath::Sin(AliveT * 7.0) * FMath::Exp(-AliveT * 0.9) : 0.02 * FMath::Sin(G.RealTime * 1.3)); }
 			if (Z.Look == "button") { DrawButton(S, Z, AliveT >= 0); }
+			if (Z.Look == "patch")
+			{
+				// A bed of flowers: the target to stop on. They open when the machine is fixed.
+				D.RoundRect(Z.Min.X, Z.Min.Y - 0.06, Z.Max.X, Z.Min.Y + 0.06, 0.05, Col(0x7a5236));
+				const uint32 Petals[3] = { 0xff6b9a, 0xffc93c, 0xffffff };
+				int K = 0;
+				for (double X = Z.Min.X + 0.1; X < Z.Max.X - 0.05; X += 0.16, ++K)
+				{
+					const double H = 0.16 + 0.1 * Hash(K * 1.7) + (AliveT >= 0 ? 0.08 : 0.0);
+					const double Sw = 0.02 * FMath::Sin(G.RealTime * 1.8 + K);
+					D.Line(X, Z.Min.Y + 0.04, X + Sw, Z.Min.Y + H, 0.025, Col(0x3e8a4a));
+					D.Circle(X + Sw, Z.Min.Y + H, AliveT >= 0 ? 0.075 : 0.055, Col(Petals[K % 3]), 10);
+					D.Circle(X + Sw, Z.Min.Y + H, 0.022, Col(0xf2a900), 8);
+				}
+			}
 		}
 
 		// Slots: where parts can go.

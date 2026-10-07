@@ -1,0 +1,21 @@
+// World 3, level 5 - Practise: free fall onto a trampoline. The tilt decides where the bounce goes.
+{
+  "id": "newton.w3.05", "name": "Drop and Bounce", "goal": "Tilt the trampoline so the ball bounces into the basket",
+  "concept": "bounce-angle", "syllabus": [ "CBSE Class 9 · Gravitation", "CBSE Class 11 · Motion in a Plane" ],
+  "why": "The ball leaves the trampoline at the same angle it arrived, mirrored. Tilt it and the bounce leans over.",
+  "whyStudent": "Falling h, the ball arrives at v = √(2gh). The pad mirrors its direction: tilting the pad by θ turns the bounce by 2θ.",
+  "formula": "v = √(2gh),  turn = 2θ",
+  "example": "Dropped about 3.4 m, the ball lands at about {=sqrt(2*g*3.4):1} m/s. A tilt of {bouncer.tilt:0}° turns the bounce {=2*bouncer.tilt:0}° from straight up.",
+  "stopText": "Not in the basket!", "timeLimit": 8, "par": 1,
+  "view": [ -3, -0.5, 8, 5.2 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0.6, "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 4.15, 0.45 ], [ 4.15, 0 ] ], "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 5.05, 0 ], [ 5.05, 0.45 ] ], "restitution": 0.3 }
+  ],
+  "zones": [ { "id": "basket", "look": "basket", "rect": [ 4.2, 0, 5.0, 0.45 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 4.0 ] } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "bouncer" ], "facing": -1 } ],
+  "tray": [ { "part": "bouncer", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "basket" } ]
+}

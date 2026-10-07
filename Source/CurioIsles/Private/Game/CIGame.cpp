@@ -91,6 +91,28 @@ void FCIGame::StartLevel(int32 World, int32 Level)
 	const CI::FLevelDef* L = CurrentLevel();
 	if (!L) { return; }
 	Setup = CI::FSetup::Defaults(*L);
+	// Angry Birds style: the parts are already in the machine. Each one starts in the first spot that
+	// takes it; the player tunes it (and may drag it to another spot).
+	for (int32 T = 0; T < (int32)L->Tray.size(); ++T)
+	{
+		for (int32 C = 0; C < L->Tray[T].Count; ++C)
+		{
+			for (int32 S = 0; S < (int32)L->Slots.size(); ++S)
+			{
+				bool bFixed = false;
+				for (const CI::FFixedPart& F : L->Fixed) { if (L->FindSlot(F.Slot) == S) { bFixed = true; } }
+				if (bFixed || Setup.PartInSlot(S) >= 0 || !L->Slots[S].AcceptsPart(L->Tray[T].Part)) { continue; }
+				CI::FPlacedPart P;
+				P.Tray = T;
+				P.Slot = S;
+				for (const CI::FParamDef& Q : L->Tray[T].Params) { P.Values.push_back(Q.Default); }
+				Setup.Placed.push_back(P);
+				break;
+			}
+		}
+	}
+	Attempts = 0;
+	bHintDone = false;
 	Phase = ECIPhase::Build;
 	PhaseTime = 0;
 	Selected = -1;
@@ -257,6 +279,7 @@ void FCIGame::HandlePointer(const FCIPointer& P)
 				GripPointer = P.Pos;
 				bAimArmed = false;
 				AimPower = 0;
+				bHintDone = true;
 				Selected = -1;
 				DragGrip(P.Pos);
 				return;
@@ -401,6 +424,12 @@ TArray<FCIGrip> FCIGame::Grips() const
 			Grip.Kind = ECIGrip::LauncherAim;
 			Grip.World = FVector2D(G.Anchors[0].Point.X, G.Anchors[0].Point.Y);
 			break;
+		case CI::EPartBehavior::Bouncer:
+			if (G.Chains.empty()) { continue; }
+			Grip.Kind = ECIGrip::Tilt;
+			// The raised end of the pad.
+			Grip.World = FVector2D(G.Chains[0].Points[1].X, G.Chains[0].Points[1].Y + 0.45);
+			break;
 		case CI::EPartBehavior::Brake:
 		{
 			if (G.Brakes.empty() || PI2.Values.empty()) { continue; }
@@ -443,6 +472,12 @@ void FCIGame::DragGrip(const FVector2D& Screen2)
 	case ECIGrip::RampHeight:
 		SetParam(GripGrab, "height", W.Y - 0.75 - G.Base.Y);
 		break;
+	case ECIGrip::Tilt:
+	{
+		const double DX = (W.X - G.Pivot.X) * G.Facing, DY = W.Y - 0.45 - G.Pivot.Y;
+		SetParam(GripGrab, "tilt", FMath::RadiansToDegrees(FMath::Atan2(DY, FMath::Max(DX, 0.05))));
+		break;
+	}
 	case ECIGrip::BrakeStrength:
 		if (!G.Brakes.empty() && !Item.Params.empty())
 		{
@@ -497,6 +532,8 @@ void FCIGame::Run()
 	Sim.Events.clear();
 	Phase = ECIPhase::Running;
 	PhaseTime = 0;
+	++Attempts;
+	bHintDone = true;
 	bSinking = false;
 	Accumulator = 0;
 	bPaused = false;
@@ -526,6 +563,12 @@ void FCIGame::TickLevel(double Dt)
 	{
 		if (bPreviewDirty) { UpdatePreview(); }
 		Alpha = 1;
+		return;
+	}
+	// A miss resets by itself after a moment, so the next try is one pull away.
+	if (Phase == ECIPhase::Result && !bSuccess && PhaseTime > 2.2)
+	{
+		Retry();
 		return;
 	}
 	if (bPaused) { return; }
@@ -565,7 +608,7 @@ void FCIGame::Finish()
 	if (bSuccess)
 	{
 		// Stars: solved; within par; (M2) a correct prediction.
-		Stars = 1 + (Setup.NumPlaced() <= L->Par ? 1 : 0);
+		Stars = Attempts <= 2 ? 3 : (Attempts <= 5 ? 2 : 1);
 		const FString Id = ToF(L->Id);
 		int32& Best = Save ? Save->Stars.FindOrAdd(Id) : Stars;
 		bNewBest = Stars > Best;
@@ -819,4 +862,13 @@ void FCIGame::TickParticles(double Dt)
 		P.P += P.V * Dt;
 		P.Angle += P.Spin * Dt;
 	}
+}
+
+bool FCIGame::IsUnlocked(int32 World, int32 Level) const
+{
+	// The first machine of every world is open; each solve opens the next one.
+	if (Level <= 0 || !Save) { return true; }
+	if (World < 0 || World >= (int32)Island.Worlds.size() || Level >= (int32)Island.Worlds[World].Levels.size()) { return false; }
+	const int32* Stars2 = Save->Stars.Find(UTF8_TO_TCHAR(Island.Worlds[World].Levels[Level - 1].Id.c_str()));
+	return Stars2 && *Stars2 > 0;
 }

@@ -75,6 +75,23 @@ namespace CI
 			R.Decel = Value(Part, Values, "strength", 2);
 			Out.Brakes.push_back(R);
 		}
+
+		// A springy pad on a post, tilted toward the facing side: whatever lands on it bounces off.
+		void BuildBouncer(const FPartDef& Part, const std::vector<double>& Values, const FSlotDef& Slot, FPartGeometry& Out)
+		{
+			const double F = Slot.Facing;
+			const double Half = Part.Prop("length", 1.4) * 0.5;
+			const double Rad = Value(Part, Values, "tilt", 20) * kDegToRad;
+			// Tilt 0 = flat; a positive tilt raises the far side so the pad faces back toward the ball.
+			const FVec2 Dir(F * Cos(Rad), Sin(Rad));
+			Out.Pivot = Slot.Pos + FVec2(0, Part.Prop("height", 0.4));
+			Out.Angle = F > 0 ? Rad : kPi - Rad;
+			FChain C;
+			C.Friction = 0;
+			C.Restitution = Part.Prop("restitution", 0.85);
+			C.Points = { Out.Pivot - Dir * Half, Out.Pivot + Dir * Half };
+			Out.Chains.push_back(C);
+		}
 	}
 
 	void BuildPartGeometry(const FPartDef& Part, const std::vector<double>& Values, const FSlotDef& Slot, FPartGeometry& Out)
@@ -87,6 +104,7 @@ namespace CI
 		case EPartBehavior::Ramp: BuildRamp(Part, Values, Slot, Out); break;
 		case EPartBehavior::Launcher: BuildLauncher(Part, Values, Slot, Out); break;
 		case EPartBehavior::Brake: BuildBrake(Part, Values, Slot, Out); break;
+		case EPartBehavior::Bouncer: BuildBouncer(Part, Values, Slot, Out); break;
 		}
 	}
 }

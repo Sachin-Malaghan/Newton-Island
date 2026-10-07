@@ -14,7 +14,7 @@ namespace CI
 	// ---------------------------------------------------------------- parts
 
 	// What a part does in the simulation. New behaviours are code; everything else about a part is data.
-	enum class EPartBehavior { Ramp, Launcher, Brake };
+	enum class EPartBehavior { Ramp, Launcher, Brake, Bouncer };
 
 	// A slider on a part. Values snap to Step, so the solver can try every value a player can pick.
 	struct FParamDef

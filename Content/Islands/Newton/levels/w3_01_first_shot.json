@@ -1,0 +1,17 @@
+// World 3, level 1 - Discover: pull back, let go. The ball flies in a curve.
+{
+  "id": "newton.w3.01", "name": "First Shot", "goal": "Pull back, let go, ring the bell",
+  "concept": "curved-flight", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "Gravity bends the ball's path into a curve. Pull harder and it flies farther.",
+  "whyStudent": "The ball moves sideways at a steady speed while gravity changes its vertical speed. Together they draw a parabola.",
+  "formula": "R = v² sin 2θ ÷ g",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  R = {=launcher.speed^2*sin(2*launcher.angle)/g:1} m on flat ground.",
+  "stopText": "Missed the bell!", "timeLimit": 8, "par": 1,
+  "view": [ -2.4, -0.5, 10, 4.6 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0.5, "restitution": 0.3 } ],
+  "zones": [ { "id": "bell", "look": "bell", "rect": [ 6.6, 0.7, 7.4, 1.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 0.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1, "params": { "speed": { "default": 4 } } } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ]
+}

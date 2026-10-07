@@ -26,6 +26,14 @@
         { "id": "strength", "label": "Braking", "symbol": "a", "unit": "m/s²", "min": 0.5, "max": 6, "step": 0.1, "default": 1.5, "decimals": 1, "less": "soft", "more": "hard" }
       ],
       "props": { "length": 3, "reach": 1.5 }
+    },
+    {
+      "id": "bouncer", "name": "Trampoline", "behavior": "bouncer", "look": "trampoline",
+      "blurb": "Bounces whatever lands on it. Tilt it to aim the bounce.",
+      "params": [
+        { "id": "tilt", "label": "Tilt", "symbol": "θ", "unit": "°", "min": 0, "max": 50, "step": 1, "default": 5, "decimals": 0, "less": "flat", "more": "tilted" }
+      ],
+      "props": { "length": 1.4, "height": 0.4, "restitution": 0.85 }
     }
   ]
 }

@@ -1,0 +1,21 @@
+// World 1, level 4 - Discover: deceleration. One pad, one knob: harder braking stops the cart sooner.
+{
+  "id": "newton.w1.04", "name": "Easy Stop", "goal": "Stop the cart on the button",
+  "concept": "slowing-down", "syllabus": [ "CBSE Class 9 · Motion" ],
+  "why": "A harder brake takes speed away faster, so the cart stops sooner.",
+  "whyStudent": "Deceleration is how fast speed is lost. From speed u, a cart stops in s = u² ÷ 2a.",
+  "formula": "s = u² ÷ 2a",
+  "example": "u = 3.0 m/s, a = {brake.strength:1} m/s²  →  s = 9 ÷ (2 × {brake.strength:1}) = {=9/(2*brake.strength):2} m.",
+  "stopText": "Stopped, but not on the button.", "timeLimit": 12, "par": 1,
+  "view": [ -2.4, -0.9, 10.4, 2.8 ],
+  "surfaces": [ { "look": "track", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0, "restitution": 0.2 } ],
+  "zones": [
+    { "id": "button", "look": "button", "rect": [ 5.0, 0, 6.0, 1 ] },
+    { "id": "end", "look": "none", "rect": [ 10.4, -1, 12, 2 ] }
+  ],
+  "bodies": [ { "id": "cart", "kind": "cart", "radius": 0.3, "pos": [ -1.2, 0.3 ], "vel": [ 3, 0 ] } ],
+  "slots": [ { "id": "a", "pos": [ 3.6, 0 ], "accepts": [ "brake" ] } ],
+  "tray": [ { "part": "brake", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "cart", "zone": "button" } ],
+  "fails": [ { "body": "cart", "zone": "end", "say": "It rolled away!" } ]
+}

@@ -1,0 +1,20 @@
+// World 3, level 4 - Challenge: a stone bridge overhead. A high lob hits it; a flat, fast shot slips under.
+{
+  "id": "newton.w3.04", "name": "Low Bridge", "goal": "Get the ball to the bell past the stone bridge",
+  "concept": "flat-and-fast", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "A flat shot stays low. It needs more speed to go the same distance, but it fits under the bridge.",
+  "whyStudent": "The same range can be reached with a low angle or a high one (θ and 90° − θ). The low one stays under H = v² sin²θ ÷ 2g.",
+  "formula": "H = v² sin²θ ÷ 2g",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  the curve tops out {=launcher.speed^2*sin(launcher.angle)^2/(2*g):2} m above the launcher.",
+  "stopText": "Missed the bell!", "timeLimit": 8, "par": 1,
+  "view": [ -2.4, -0.5, 12.6, 5.6 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0.5, "restitution": 0.3 },
+    { "look": "wall", "points": [ [ 3, 2.3 ], [ 8, 2.3 ], [ 8, 5.6 ], [ 3, 5.6 ], [ 3, 2.3 ] ], "friction": 0.3, "restitution": 0.3 }
+  ],
+  "zones": [ { "id": "bell", "look": "bell", "rect": [ 9.8, 0.7, 10.6, 1.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 0.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1, "params": { "speed": { "default": 6 } } } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ]
+}

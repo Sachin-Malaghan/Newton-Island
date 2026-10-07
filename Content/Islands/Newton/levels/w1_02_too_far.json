@@ -1,0 +1,17 @@
+// World 1, level 2 - Discover: distance travelled. Friction uses up the ball's energy, so height sets how far it rolls.
+{
+  "id": "newton.w1.02", "name": "Too Far!", "goal": "Stop the ball on the flower patch",
+  "concept": "distance-travelled", "syllabus": [ "CBSE Class 9 · Motion", "CBSE Class 9 · Work and Energy" ],
+  "why": "The higher the ball starts, the farther the grass lets it roll before it stops.",
+  "whyStudent": "All the energy from the height h is used up by friction over the distance s: m g h = μ m g s, so s = h ÷ μ.",
+  "formula": "s = h ÷ μ",
+  "example": "h = {ramp.height:2} m, μ = 0.25  →  s = {ramp.height:2} ÷ 0.25 = {=ramp.height/0.25:2} m along the grass.",
+  "stopText": "Not on the flowers!", "timeLimit": 12, "par": 1,
+  "view": [ -3.4, -0.4, 8.6, 3.2 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 0 ], [ 16, 0 ] ], "friction": 0.25, "restitution": 0.2 } ],
+  "zones": [ { "id": "patch", "look": "patch", "rect": [ 4.4, 0, 5.4, 0.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2, 0.15 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "ramp" ] } ],
+  "tray": [ { "part": "ramp", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "ball", "zone": "patch" } ]
+}

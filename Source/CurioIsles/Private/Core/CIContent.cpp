@@ -139,6 +139,7 @@ namespace CI
 			if (S == "ramp") { Out = EPartBehavior::Ramp; return true; }
 			if (S == "launcher") { Out = EPartBehavior::Launcher; return true; }
 			if (S == "brake") { Out = EPartBehavior::Brake; return true; }
+			if (S == "bouncer") { Out = EPartBehavior::Bouncer; return true; }
 			return false;
 		}
 	}

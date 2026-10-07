@@ -170,3 +170,24 @@ needs it at runtime, and mark platform-specific ones `Optional`.
   tray to remove it. PLAY remains for levels without a launcher.
 - Look: sun rays, per-world scenery (meadow windmill and trees; canyon mesas and hot-air balloons), contact
   shadows, a motion streak behind the ball, vignette, lighter veil over the unsolved machine.
+
+## Simpler flow and more levels (user request 2026-10-07: "easy interface, interactions like Angry Birds")
+
+- **No tray, no placing.** `StartLevel` puts every tray part into the first spot that takes it; the player
+  only tunes it by its grip (and may drag the part to another glowing spot, e.g. the brake pad). The level
+  JSON is unchanged ("tray" still lists the parts and their slider ranges).
+- **Almost no interface in a level:** back button, title + goal, mode toggle, one hint line, and one big
+  round button bottom-right (PLAY; RETRY while running; a small SLOW button bottom-left). Launchers fire on
+  release. **A miss resets by itself after 2.2 s** (Professor Newton's bubble shows meanwhile).
+- **Stars are by attempts** (replaces "within par" until Predict exists): 3 stars = solved in 1-2 tries,
+  2 stars = 3-5 tries, 1 star = more. `FCIGame::Attempts` counts PLAY presses / shots since the level opened.
+- **Level select:** a band per world with big numbered tiles, stars under each, locks ahead; solving a
+  level opens the next one in its world (`FCIGame::IsUnlocked`); the first level of every world is open.
+- A ghost finger shows the first move until the player grabs something (`bHintDone`).
+- New part behaviour **Bouncer** (trampoline: tilt grip, restitution 0.85), surface look `wall` (stone),
+  zone look `patch` (flower bed target), zone look `none` (invisible fail area).
+- **11 levels:** World 1 Motion Meadow: First Roll, Too Far!, Ditch Jump, Easy Stop, Brake!, Express Cart.
+  World 3 Gravity Cliffs: First Shot, Over the Wall, Canyon Shot, Low Bridge, Drop and Bounce. All pass the
+  solver (win fractions 2%-53%), determinism and text checks.
+- **Push after every change** (user instruction): commit and `git push` to `origin main` once build and
+  tests pass.

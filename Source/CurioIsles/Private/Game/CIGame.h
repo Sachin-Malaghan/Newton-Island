@@ -39,7 +39,7 @@ struct FCISliderWidget
 	int32 Param = -1;
 };
 
-enum class ECIGrip : uint8 { RampHeight, LauncherAim, BrakeStrength };
+enum class ECIGrip : uint8 { RampHeight, LauncherAim, BrakeStrength, Tilt };
 
 struct FCIGrip
 {
@@ -117,6 +117,9 @@ public:
 	double AliveTime = -1;         // seconds since the machine came alive (success); -1 = not yet
 	FVector2D AliveOrigin = FVector2D::ZeroVector;
 	double Shake = 0;
+	int32 Attempts = 0;            // PLAY presses (or shots) on this level; fewer = more stars
+	bool bHintDone = false;        // the finger hint stops once the player has grabbed something
+	bool IsUnlocked(int32 World, int32 Level) const;
 	bool bSinking = false;         // failed into water: the body sinks instead of rolling on
 
 	// Editing

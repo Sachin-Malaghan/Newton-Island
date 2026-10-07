@@ -1,6 +1,6 @@
-// World 1, level 8 - Practise: deceleration. The cart must stop on the button, not roll into the pond.
+// World 1, level 5 - Practise: deceleration. The cart must stop on the button, not roll into the pond.
 {
-  "id": "newton.w1.08",
+  "id": "newton.w1.05",
   "name": "Brake!",
   "goal": "Stop the cart on the button, before the pond",
   "concept": "deceleration",
