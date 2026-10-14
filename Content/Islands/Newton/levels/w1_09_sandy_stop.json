@@ -1,0 +1,21 @@
+// World 1, level 9 - Practise: friction. Sand grips twice as hard as grass, and the pond waits past the flowers.
+{
+  "id": "newton.w1.09", "name": "Sandy Stop", "goal": "Stop the ball on the flowers in the sand, not in the pond",
+  "concept": "friction", "syllabus": [ "CBSE Class 8 · Friction", "CBSE Class 9 · Work and Energy" ],
+  "why": "Sand grips the ball harder than grass, so it stops in a shorter distance.",
+  "whyStudent": "Friction does work μ m g s against the ball until its energy m g h is gone: s = h ÷ μ. On sand μ = 0.5, so s = 2h.",
+  "formula": "s = h ÷ μ",
+  "example": "h = {ramp.height:2} m, μ = 0.5  →  s = {ramp.height:2} ÷ 0.5 = {=ramp.height/0.5:2} m across the sand.",
+  "stopText": "Not on the flowers!", "timeLimit": 12, "par": 1,
+  "view": [ -3.4, -1.0, 6.6, 3.2 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 0 ], [ 3.4, 0 ], [ 3.6, -0.6 ], [ 5.4, -0.6 ], [ 5.6, 0 ], [ 16, 0 ] ], "friction": 0.5, "restitution": 0.2 } ],
+  "zones": [
+    { "id": "patch", "look": "patch", "rect": [ 2.3, 0, 3.0, 0.6 ] },
+    { "id": "pond", "look": "pond", "rect": [ 3.5, -1, 5.5, 0.1 ], "level": -0.15 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2, 0.15 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "ramp" ] } ],
+  "tray": [ { "part": "ramp", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "ball", "zone": "patch" } ],
+  "fails": [ { "body": "ball", "zone": "pond", "say": "Splash!" } ]
+}
