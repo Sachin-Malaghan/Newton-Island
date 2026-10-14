@@ -1,0 +1,25 @@
+// World 1, level 8 - Practise: acceleration then deceleration. The hill speeds the cart up; the brake must undo it.
+{
+  "id": "newton.w1.08", "name": "Downhill Cart", "goal": "The cart rolls down the hill. Stop it on the button",
+  "concept": "speeding-up-and-slowing-down", "syllabus": [ "CBSE Class 9 · Motion" ],
+  "why": "Going downhill the cart speeds up, so it needs a strong brake to stop in time.",
+  "whyStudent": "Down the slope gravity accelerates the cart; on the pad the brake decelerates it. It stops in s = v² ÷ 2a, where v is its speed at the bottom.",
+  "formula": "s = v² ÷ 2a",
+  "example": "At the bottom the cart moves at about {cart.maxSpeed:2} m/s. With a = {brake.strength:1} m/s² it stops in {=cart.maxSpeed^2/(2*brake.strength):2} m.",
+  "stopText": "Stopped, but not on the button.", "timeLimit": 14, "par": 1,
+  "view": [ -5, -1.2, 16.4, 3.2 ],
+  "surfaces": [ { "look": "track", "points": [ [ -9, 1.2 ], [ -4, 1.2 ], [ 0, 0 ], [ 12.8, 0 ], [ 13.3, -0.8 ], [ 15.7, -0.8 ], [ 16.2, 0 ], [ 24, 0 ] ], "friction": 0, "restitution": 0.2 } ],
+  "zones": [
+    { "id": "button", "look": "button", "rect": [ 10.2, 0, 11.0, 1 ] },
+    { "id": "pond", "look": "pond", "rect": [ 13.0, -1, 16.0, 0.4 ], "level": -0.2 }
+  ],
+  "bodies": [ { "id": "cart", "kind": "cart", "radius": 0.3, "pos": [ -2.91379563, 1.18734783 ] } ],
+  "slots": [
+    { "id": "a", "pos": [ 2, 0 ], "accepts": [ "brake" ] },
+    { "id": "b", "pos": [ 5, 0 ], "accepts": [ "brake" ] },
+    { "id": "c", "pos": [ 8, 0 ], "accepts": [ "brake" ] }
+  ],
+  "tray": [ { "part": "brake", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "cart", "zone": "button" } ],
+  "fails": [ { "body": "cart", "zone": "pond", "say": "Splash!" } ]
+}
