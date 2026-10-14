@@ -1,0 +1,25 @@
+// World 1, level 10 - Boss machine: two parts at once. The ramp sets the speed, the brake takes it away.
+{
+  "id": "newton.w1.10", "name": "Ramp and Brake", "goal": "Roll the ball down and stop it on the button",
+  "concept": "energy-in-energy-out", "syllabus": [ "CBSE Class 9 · Motion", "CBSE Class 9 · Work and Energy" ],
+  "why": "The higher the ramp, the faster the ball arrives, and the harder the brake must work to stop it.",
+  "whyStudent": "The ramp gives v = √(2gh); the pad stops it in s = v² ÷ 2a = g h ÷ a. Height and braking trade off against each other.",
+  "formula": "s = g h ÷ a",
+  "example": "h = {ramp.height:2} m, a = {brake.strength:1} m/s²  →  s = {g:2} × {ramp.height:2} ÷ {brake.strength:1} = {=g*ramp.height/brake.strength:2} m on the pad.",
+  "stopText": "Stopped, but not on the button.", "timeLimit": 14, "par": 2,
+  "view": [ -3.2, -1.2, 12.4, 3.2 ],
+  "surfaces": [ { "look": "track", "points": [ [ -8, 0 ], [ 9.3, 0 ], [ 9.8, -0.8 ], [ 12.2, -0.8 ], [ 12.7, 0 ], [ 20, 0 ] ], "friction": 0, "restitution": 0.2 } ],
+  "zones": [
+    { "id": "button", "look": "button", "rect": [ 6.4, 0, 7.2, 1 ] },
+    { "id": "pond", "look": "pond", "rect": [ 9.5, -1, 12.5, 0.4 ], "level": -0.2 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2, 0.15 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [
+    { "id": "ramp", "pos": [ 0, 0 ], "accepts": [ "ramp" ] },
+    { "id": "a", "pos": [ 1.5, 0 ], "accepts": [ "brake" ] },
+    { "id": "b", "pos": [ 4.5, 0 ], "accepts": [ "brake" ] }
+  ],
+  "tray": [ { "part": "ramp", "count": 1 }, { "part": "brake", "count": 1 } ],
+  "goals": [ { "type": "rest", "body": "ball", "zone": "button" } ],
+  "fails": [ { "body": "ball", "zone": "pond", "say": "Splash!" } ]
+}
