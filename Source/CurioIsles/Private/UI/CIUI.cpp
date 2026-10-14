@@ -267,11 +267,14 @@ namespace
 			D.Text(FString::Printf(TEXT("WORLD %d"), W.Number), B.Min.X + Ui.U * 3, B.Min.Y + Ui.U * 4, Ui.U * 2.2, Col(0x10284a, 0.75f), 0, 0.5, true);
 			D.TextWrapped(ToF(W.Name), B.Min.X + Ui.U * 3, B.Min.Y + Ui.U * 6.5, Ui.U * 29, Ui.U * 3.8, 1.15, Col(Ink), 0, true);
 
-			const double Tile = FMath::Min(BandH - Ui.U * 12, Ui.U * 19);
-			const double Gap = Ui.U * 3;
+			// Every level of the world fits on one row, however wide or narrow the screen.
+			const double Gap = Ui.U * 2.2;
+			const int32 N = FMath::Max(1, (int32)W.Levels.size());
+			const double Avail = B.Max.X - Ui.U * 2 - (B.Min.X + Ui.U * 38);
+			const double Tile = FMath::Min3(BandH - Ui.U * 12, Ui.U * 19, (Avail - Gap * (N - 1)) / N);
 			double TX = B.Min.X + Ui.U * 38;
 			const double TY = B.GetCenter().Y - Tile * 0.5 - Ui.U * 2.5;
-			for (int32 Li = 0; Li < (int32)W.Levels.size() && TX + Tile < B.Max.X - Ui.U * 2; ++Li, TX += Tile + Gap)
+			for (int32 Li = 0; Li < (int32)W.Levels.size(); ++Li, TX += Tile + Gap)
 			{
 				const CI::FLevelDef& L = W.Levels[Li];
 				const bool bOpen = G.IsUnlocked(Wi, Li);
