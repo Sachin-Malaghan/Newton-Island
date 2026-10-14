@@ -1,0 +1,17 @@
+// World 3, level 6 - Practise: landing higher than you started. The curve must still be rising when it reaches the cliff.
+{
+  "id": "newton.w3.06", "name": "Cliff Top", "goal": "Ring the bell on top of the cliff",
+  "concept": "landing-higher", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "To land up high, the ball must still be above the cliff edge when it gets there: steeper or harder.",
+  "whyStudent": "At distance x the ball's height is y = x tanθ − g x² ÷ (2 v² cos²θ). It must be above 3 m at the cliff edge.",
+  "formula": "y = x tanθ − g x² ÷ (2 v² cos²θ)",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  at the cliff (x = 7 m) the ball is {=0.35+0.7*sin(launcher.angle)+(7-0.7*cos(launcher.angle))*tan(launcher.angle)-g*(7-0.7*cos(launcher.angle))^2/(2*launcher.speed^2*cos(launcher.angle)^2):2} m up.",
+  "stopText": "Missed the bell!", "timeLimit": 8, "par": 1,
+  "view": [ -2.4, -0.5, 12.4, 6.4 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 0 ], [ 7, 0 ], [ 7.4, 3 ], [ 20, 3 ] ], "friction": 0.5, "restitution": 0.3 } ],
+  "zones": [ { "id": "bell", "look": "bell", "rect": [ 9.6, 3.7, 10.4, 4.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 0.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1, "params": { "speed": { "default": 7 } } } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ]
+}
