@@ -18,7 +18,7 @@
       "teaches": "Free fall, projectiles, centre of mass",
       "theme": { "skyTop": "#8ec9e8", "skyBottom": "#ffe2b8", "hillFar": "#f2c48d", "hillMid": "#e5a568", "hillNear": "#cf8a4f",
                  "ground": "#d9925a", "groundDark": "#a8633a", "accent": "#ff6f59", "sun": "#fff0c9" },
-      "levels": [ "levels/w3_01_first_shot.json", "levels/w3_02_over_the_wall.json", "levels/w3_03_canyon_shot.json", "levels/w3_04_low_bridge.json", "levels/w3_05_drop_and_bounce.json", "levels/w3_06_cliff_top.json" ]
+      "levels": [ "levels/w3_01_first_shot.json", "levels/w3_02_over_the_wall.json", "levels/w3_03_canyon_shot.json", "levels/w3_04_low_bridge.json", "levels/w3_05_drop_and_bounce.json", "levels/w3_06_cliff_top.json", "levels/w3_07_the_window.json" ]
     }
   ]
 }
