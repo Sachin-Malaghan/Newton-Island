@@ -186,8 +186,14 @@ needs it at runtime, and mark platform-specific ones `Optional`.
 - A ghost finger shows the first move until the player grabs something (`bHintDone`).
 - New part behaviour **Bouncer** (trampoline: tilt grip, restitution 0.85), surface look `wall` (stone),
   zone look `patch` (flower bed target), zone look `none` (invisible fail area).
-- **11 levels:** World 1 Motion Meadow: First Roll, Too Far!, Ditch Jump, Easy Stop, Brake!, Express Cart.
-  World 3 Gravity Cliffs: First Shot, Over the Wall, Canyon Shot, Low Bridge, Drop and Bounce. All pass the
+- **20 levels (2026-10-14):** World 1 Motion Meadow: First Roll, Too Far!, Ditch Jump, Easy Stop, Brake!,
+  Express Cart, Long Jump, Downhill Cart, Sandy Stop, Ramp and Brake (two parts).
+  World 3 Gravity Cliffs: First Shot, Over the Wall, Canyon Shot, Low Bridge, Drop and Bounce, Cliff Top,
+  The Window, Down the Valley, Bounce Over, Grand Canyon. All pass the
   solver (win fractions 2%-53%), determinism and text checks.
 - **Push after every change** (user instruction): commit and `git push` to `origin main` once build and
   tests pass.
+- **Adding a level:** write `Content/Islands/Newton/levels/wN_NN_name.json`, then
+  `bash Tools/SimHarness/add_level.sh <file> <id> "<Name>"` registers it in island.json, runs the solver
+  checks for it, and commits + pushes it only if every check passes. A body that starts resting on a slope
+  must sit exactly one radius off the surface (to ~1e-7 m) or it is treated as overlapping and falls through.
