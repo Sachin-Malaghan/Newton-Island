@@ -1,0 +1,22 @@
+// World 3, level 9 - Challenge: the bounce has to clear a wall before it can drop into the basket.
+{
+  "id": "newton.w3.09", "name": "Bounce Over", "goal": "Bounce the ball over the wall into the basket",
+  "concept": "bounce-height-and-angle", "syllabus": [ "CBSE Class 9 · Gravitation", "CBSE Class 11 · Motion in a Plane" ],
+  "why": "Too little tilt and the ball goes straight up; too much and it skims into the wall. In between, it arcs over.",
+  "whyStudent": "The ball bounces off at about 0.85 × its landing speed, turned by 2θ. Its curve must top the 2.2 m wall and come down in the basket.",
+  "formula": "turn = 2θ,  bounce speed ≈ 0.85 × √(2gh)",
+  "example": "Tilt {bouncer.tilt:0}° turns the bounce {=2*bouncer.tilt:0}° from straight up, leaving at about {=0.85*sqrt(2*g*4.6):1} m/s.",
+  "stopText": "Not in the basket!", "timeLimit": 8, "par": 1,
+  "view": [ -3, -0.5, 9, 6.6 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 20, 0 ] ], "friction": 0.6, "restitution": 0.3 },
+    { "look": "wall", "points": [ [ 2.6, 0 ], [ 2.6, 2.2 ], [ 3.1, 2.2 ], [ 3.1, 0 ] ], "friction": 0.3, "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 5.15, 0.45 ], [ 5.15, 0 ] ], "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 6.05, 0 ], [ 6.05, 0.45 ] ], "restitution": 0.3 }
+  ],
+  "zones": [ { "id": "basket", "look": "basket", "rect": [ 5.2, 0, 6.0, 0.45 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ 0, 5.2 ] } ],
+  "slots": [ { "id": "a", "pos": [ 0, 0 ], "accepts": [ "bouncer" ], "facing": -1 } ],
+  "tray": [ { "part": "bouncer", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "basket" } ]
+}
