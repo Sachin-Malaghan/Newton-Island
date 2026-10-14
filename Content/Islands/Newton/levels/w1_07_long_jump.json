@@ -1,0 +1,26 @@
+// World 1, level 7 - Challenge: a high table and a wide ditch. The ball needs a lot of speed to make it.
+{
+  "id": "newton.w1.07", "name": "Long Jump", "goal": "Jump the wide ditch into the basket",
+  "concept": "speed-and-distance", "syllabus": [ "CBSE Class 9 · Motion" ],
+  "why": "From higher up the ball falls for longer, and with more speed it covers more ground while it falls.",
+  "whyStudent": "Off the table the ball moves sideways at its speed v for the whole fall time t = √(2H ÷ g): distance = v × t.",
+  "formula": "distance = v × √(2H ÷ g)",
+  "example": "Leaving the table at {ball.exitSpeed:2} m/s from 2 m up, it flies about {=ball.exitSpeed*sqrt(2*1.7/g):2} m before reaching the basket rim.",
+  "stopText": "Not in the basket!", "timeLimit": 8, "par": 1,
+  "view": [ -3.6, -0.9, 8.2, 4.6 ],
+  "surfaces": [
+    { "look": "ground", "points": [ [ -8, 0 ], [ 3.2, 0 ], [ 3.4, -0.6 ], [ 5.4, -0.6 ], [ 5.6, 0 ], [ 16, 0 ] ], "friction": 0.6, "restitution": 0.3 },
+    { "look": "block", "points": [ [ -3, 0 ], [ -3, 2 ], [ 3, 2 ], [ 3, 0 ] ], "friction": 0, "restitution": 0.2 },
+    { "look": "basket", "points": [ [ 5.85, 0.45 ], [ 5.85, 0 ] ], "restitution": 0.3 },
+    { "look": "basket", "points": [ [ 6.75, 0 ], [ 6.75, 0.45 ] ], "restitution": 0.3 }
+  ],
+  "zones": [
+    { "id": "basket", "look": "basket", "rect": [ 5.9, 0, 6.7, 0.45 ] },
+    { "id": "ditch", "look": "pond", "rect": [ 3.3, -1, 5.5, 0.1 ], "level": -0.15 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -2.2, 2.15 ], "on": { "part": "ramp", "anchor": "top" } } ],
+  "slots": [ { "id": "table", "pos": [ 0.5, 2 ], "accepts": [ "ramp" ] } ],
+  "tray": [ { "part": "ramp", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "basket" } ],
+  "fails": [ { "body": "ball", "zone": "ditch", "say": "Splash!" } ]
+}
