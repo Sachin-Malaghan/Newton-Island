@@ -1,0 +1,21 @@
+// World 3, level 10 - Boss machine: the widest canyon. Only a near-perfect angle with real power reaches the far bell.
+{
+  "id": "newton.w3.10", "name": "Grand Canyon", "goal": "Ring the bell on the far side of the great canyon",
+  "concept": "maximum-range", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "For the longest shot, aim halfway between flat and straight up - and pull back all the way.",
+  "whyStudent": "R = v² sin 2θ ÷ g is largest when sin 2θ = 1, at θ = 45°. Any other angle needs more speed for the same distance.",
+  "formula": "R(max) = v² ÷ g  at θ = 45°",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°  →  R = {=launcher.speed^2*sin(2*launcher.angle)/g:1} m; the best this speed can do is {=launcher.speed^2/g:1} m at 45°.",
+  "stopText": "Missed the bell!", "timeLimit": 9, "par": 1,
+  "view": [ -4, -0.5, 22.5, 8.5 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 3 ], [ 1, 3 ], [ 1.6, 0 ], [ 15.4, 0 ], [ 16, 3 ], [ 30, 3 ] ], "friction": 0.5, "restitution": 0.3 } ],
+  "zones": [
+    { "id": "bell", "look": "bell", "rect": [ 18.6, 3.7, 19.4, 4.6 ] },
+    { "id": "river", "look": "river", "rect": [ 1.6, -1, 15.4, 0.5 ], "level": 0.35 }
+  ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -1, 3.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "cliff", "pos": [ -1, 3 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1 } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ],
+  "fails": [ { "body": "ball", "zone": "river", "say": "Splash!" } ]
+}
