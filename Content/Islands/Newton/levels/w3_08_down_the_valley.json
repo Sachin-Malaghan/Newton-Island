@@ -1,0 +1,17 @@
+// World 3, level 8 - Practise: firing downhill. Starting high, the ball falls for longer and flies farther than you expect.
+{
+  "id": "newton.w3.08", "name": "Down the Valley", "goal": "Fire from the clifftop and ring the bell in the valley",
+  "concept": "launching-from-height", "syllabus": [ "CBSE Class 11 · Motion in a Plane" ],
+  "why": "From up high the ball has longer to fly before it lands, so a gentle shot goes a long way.",
+  "whyStudent": "Launched from height H, the flight lasts until y falls by H, which takes longer than on flat ground, so the range is more than v² sin 2θ ÷ g.",
+  "formula": "R > v² sin 2θ ÷ g  (launched from above)",
+  "example": "v = {launcher.speed:1} m/s, θ = {launcher.angle:0}°: on flat ground it would fly {=launcher.speed^2*sin(2*launcher.angle)/g:1} m; from 4 m up it lands at {ball.landX:1} m.",
+  "stopText": "Missed the bell!", "timeLimit": 8, "par": 1,
+  "view": [ -3, -0.5, 13.6, 6.6 ],
+  "surfaces": [ { "look": "ground", "points": [ [ -8, 4 ], [ 1, 4 ], [ 1.6, 0 ], [ 20, 0 ] ], "friction": 0.5, "restitution": 0.3 } ],
+  "zones": [ { "id": "bell", "look": "bell", "rect": [ 10.6, 0.7, 11.4, 1.6 ] } ],
+  "bodies": [ { "id": "ball", "kind": "ball", "radius": 0.15, "pos": [ -1, 4.15 ], "on": { "part": "launcher", "anchor": "muzzle" } } ],
+  "slots": [ { "id": "a", "pos": [ -1, 4 ], "accepts": [ "launcher" ] } ],
+  "tray": [ { "part": "launcher", "count": 1, "params": { "speed": { "default": 12 } } } ],
+  "goals": [ { "type": "enter", "body": "ball", "zone": "bell" } ]
+}
